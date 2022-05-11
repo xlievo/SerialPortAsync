@@ -688,6 +688,12 @@ namespace SerialPortAsync
             return !serial.IsDisposed && serial.IsOpen ? serial.ReadExisting() : null;
         }
 
+        /// <summary>
+        /// Gets an array of serial port names for the current computer.
+        /// </summary>
+        /// <returns>An array of serial port names for the current computer.</returns>
+        public static string[] GetPortNames() => RJCP.IO.Ports.SerialPortStream.GetPortNames();
+
         public static void RemoveEvents<T>(T target, string eventName, Action<Delegate> remove) where T : class
         {
             if (target is null)
