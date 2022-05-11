@@ -5,3 +5,4 @@
 /.vs
 /SerialPortAsync/obj
 /SerialPortAsync/bin
+/SerialPortAsync/SerialPortAsync.csproj.user
