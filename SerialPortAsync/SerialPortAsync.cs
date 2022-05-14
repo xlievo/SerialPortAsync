@@ -107,7 +107,13 @@ namespace SerialPortAsync
 
         event EventHandler<SerialPinChangedEventArgs> PinChanged;
 
+        string ReadTo(string text);
+
+        string ReadLine();
+
         string ReadExisting();
+
+        int Read(byte[] buffer, int offset, int count);
 
         Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
@@ -293,11 +299,11 @@ namespace SerialPortAsync
 
         #region SerialPortClient
 
-        //public SerialPortClient(string port, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port), timeout, open) { }
+        //public SerialPortAsyncClient(string port, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port), timeout, open) { }
 
-        //public SerialPortClient(string port, int baud, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud), timeout, open) { }
+        //public SerialPortAsyncClient(string port, int baud, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud), timeout, open) { }
 
-        //public SerialPortClient(string port, int baud, int data, Parity parity, StopBits stopbits, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeout, open) { }
+        //public SerialPortAsyncClient(string port, int baud, int data, Parity parity, StopBits stopbits, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeout, open) { }
 
         ///// <summary>
         ///// timeout default value 10 seconds.
@@ -312,7 +318,7 @@ namespace SerialPortAsync
         ///// <param name="port"></param>
         ///// <param name="baud"></param>
         ///// <param name="open"></param>
-        //public SerialPortClient(string port, int baud, bool open = false) : this(new SerialPortStream(port, baud), timeoutDefault, open) { }
+        //public SerialPortAsyncClient(string port, int baud, bool open = false) : this(new SerialPortStream(port, baud), timeoutDefault, open) { }
 
         ///// <summary>
         ///// timeout default value 10 seconds.
@@ -323,7 +329,7 @@ namespace SerialPortAsync
         ///// <param name="parity"></param>
         ///// <param name="stopbits"></param>
         ///// <param name="open"></param>
-        //public SerialPortClient(string port, int baud, int data, Parity parity, StopBits stopbits, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeoutDefault, open) { }
+        //public SerialPortAsyncClient(string port, int baud, int data, Parity parity, StopBits stopbits, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeoutDefault, open) { }
 
         public SerialPortAsyncClient(ISerialPort serial, TimeSpan timeout = default, bool open = false)
         {
@@ -433,6 +439,11 @@ namespace SerialPortAsync
         #endregion
 
         #region SerialPortStream
+
+        /// <summary>
+        /// Read buffer length
+        /// </summary>
+        public int BufferLength { get; set; } = 4096;
 
         /// <summary>
         /// Gets or sets the byte encoding for pre- and post-transmission conversion of text.
@@ -569,14 +580,9 @@ namespace SerialPortAsync
             }
         }
 
-        public async Task<string> SendAsync(string text, bool hexString = false, TimeSpan readInterval = default)
+        public async Task<TResult> SendAsync<TResult>(Func<ValueTask> send, Func<SerialData, ValueTask<dynamic>> read)
         {
             CheckDisposed();
-
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
 
             var signal = new TaskCompletionSource<dynamic>();
 
@@ -591,6 +597,22 @@ namespace SerialPortAsync
             {
                 if (serial.IsDisposed || !serial.IsOpen) { return; }
 
+                await send();
+
+            }, read, signal));
+
+            return await signal.Task;
+        }
+
+        public async Task<string> SendAsync(string text, bool hexString = false, TimeSpan readInterval = default)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            return await SendAsync<string>(async () =>
+            {
                 if (hexString)
                 {
                     var buffer = Convert.FromHexString(text.Replace(" ", string.Empty));
@@ -611,40 +633,37 @@ namespace SerialPortAsync
                 if (SerialData.Chars != eventType) { return null; }
 
                 return ReadExisting();
-
-                //if (readDataType == eventType)
-                //{
-                //    return ReadExisting();
-                //}
-
-                //return null;
-            }, signal));
-
-            return await signal.Task as string;
+            });
         }
 
-        public async Task<string> SendAsync(byte[] buffer, TimeSpan readInterval = default)
+        //public async Task<string> SendAsync(byte[] data, TimeSpan readInterval = default)
+        //{
+        //    if (data is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(data));
+        //    }
+
+        //    return await SendAsync<string>(async () => await serial.WriteAsync(data, 0, data.Length, cancel.Token), async eventType =>
+        //    {
+        //        if (System.Threading.Timeout.InfiniteTimeSpan != readInterval && default != readInterval)
+        //        {
+        //            await Task.Delay(readInterval);
+        //        }
+
+        //        if (SerialData.Chars != eventType) { return null; }
+
+        //        return !serial.IsDisposed && serial.IsOpen ? serial.ReadExisting() : null;
+        //    });
+        //}
+
+        public async Task<byte[]> SendAsync(byte[] data, TimeSpan readInterval = default)
         {
-            CheckDisposed();
-
-            if (buffer is null)
+            if (data is null)
             {
-                throw new ArgumentNullException(nameof(buffer));
+                throw new ArgumentNullException(nameof(data));
             }
 
-            var signal = new TaskCompletionSource<dynamic>();
-
-            if (clear.IsCancellationRequested)
-            {
-                clear = new();
-            }
-
-            sendQueue.TryAdd(new Source(async () =>
-            {
-                if (serial.IsDisposed || !serial.IsOpen) { return; }
-
-                await serial.WriteAsync(buffer, 0, buffer.Length, cancel.Token);
-            }, async eventType =>
+            return await SendAsync<byte[]>(async () => await serial.WriteAsync(data, 0, data.Length, cancel.Token), async eventType =>
             {
                 if (System.Threading.Timeout.InfiniteTimeSpan != readInterval && default != readInterval)
                 {
@@ -653,17 +672,43 @@ namespace SerialPortAsync
 
                 if (SerialData.Chars != eventType) { return null; }
 
-                return ReadExisting();
+                var buffer = new byte[BufferLength];
 
-                //if (readDataType == eventType)
-                //{
-                //    return ReadExisting();
-                //}
+                var count = Read(buffer, 0, buffer.Length);
 
-                //return null;
-            }, signal));
+                if (0 >= count)
+                {
+                    return Array.Empty<byte>();
+                }
 
-            return await signal.Task as string;
+                var result = new byte[count];
+
+                Array.Copy(buffer, result, count);
+
+                return result;
+            });
+        }
+
+        /// <summary>
+        /// Reads up to the NewLine value in the input buffer.
+        /// </summary>
+        /// <returns>
+        /// The contents of the input buffer up to the first occurrence of a NewLine value.
+        /// <para>
+        /// System.TimeoutException: Data was not available in the timeout specified.
+        /// </para>
+        /// <para>
+        /// System.IO.IOException: Device Error (e.g. device removed).
+        /// </para>
+        /// <para>
+        /// System.ObjectDisposedException:
+        /// </para>
+        /// </returns>
+        public string ReadLine()
+        {
+            CheckDisposed();
+
+            return !serial.IsDisposed && serial.IsOpen ? serial.ReadLine() : null;
         }
 
         /// <summary>
@@ -686,6 +731,70 @@ namespace SerialPortAsync
             CheckDisposed();
 
             return !serial.IsDisposed && serial.IsOpen ? serial.ReadExisting() : null;
+        }
+
+        /// <summary>
+        /// Reads a string up to the specified text in the input buffer.
+        /// <para>
+        /// The ReadTo() function will read text from the byte buffer up to a predetermined limit (1024 characters) when looking for the string text. If text is not found within this limit, data is thrown away and more data is read (effectively consuming the earlier bytes).
+        /// </para>
+        /// <para>
+        /// This method is provided as compatibility with the Microsoft implementation. There are some important differences however. This method attempts to fix a minor pathological problem with the Microsoft implementation. If the string text is not found, the MS implementation may modify the internal state of the decoder. As a workaround, it pushes all decoded characters back into its internal byte buffer, which fixes the problem that a second call to the ReadTo() method returns the consistent results, but a call to Read(byte[], ..) may return data that was not actually transmitted by the DCE. This would happen in case that an invalid byte sequence was found, converted to a fall back character. The original byte sequence is removed and replaced with the byte equivalent of the fall back character.
+        /// </para>
+        /// <para>
+        /// This method is rather slow, because it tries to preserve the byte buffer in case of failure.
+        /// </para>
+        /// <para>
+        /// In case the data cannot be read, an exception is always thrown. So you may assume that if this method returns, you have valid data.
+        /// </para>
+        /// </summary>
+        /// <param name="text">The text to indicate where the read operation stops.</param>
+        /// <returns>
+        /// The contents of the input buffer up to the specified text.
+        /// <para>
+        /// System.TimeoutException: Data was not available in the timeout specified.
+        /// </para>
+        /// <para>
+        /// System.IO.IOException: Device Error (e.g. device removed).
+        /// </para>
+        /// <para>
+        /// System.ObjectDisposedException:
+        /// </para>
+        /// </returns>
+        public string ReadTo(string text)
+        {
+            CheckDisposed();
+
+            return !serial.IsDisposed && serial.IsOpen ? serial.ReadTo(text) : null;
+        }
+
+        /// <summary>
+        /// Reads a sequence of bytes from the current stream and advances the position within the stream by the number of bytes read.
+        /// </summary>
+        /// <param name="buffer">An array of bytes. When this method returns, the buffer contains the specified byte array with the values between offset and (offset + count - 1) replaced by the bytes read from the current source.</param>
+        /// <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the current stream.</param>
+        /// <param name="count">The maximum number of bytes to be read from the current stream.</param>
+        /// <returns>
+        /// The total number of bytes read into the buffer. This can be less than the number of bytes requested if that many bytes are not currently available, or zero (0) if the end of the stream has been reached.
+        /// <para>
+        /// System.ObjectDisposedException:
+        /// </para>
+        /// System.ArgumentNullException: null buffer provided.
+        /// <para>
+        /// System.ArgumentOutOfRangeException: Negative offset provided, or negative count provided.
+        /// </para>
+        /// <para>
+        /// System.ArgumentException: Offset and count exceed buffer boundaries.
+        /// </para>
+        /// <para>
+        /// System.IO.IOException: Device Error (e.g. device removed).
+        /// </para>
+        /// </returns>
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            CheckDisposed();
+
+            return !serial.IsDisposed && serial.IsOpen ? serial.Read(buffer, offset, count) : -1;
         }
 
         /// <summary>
