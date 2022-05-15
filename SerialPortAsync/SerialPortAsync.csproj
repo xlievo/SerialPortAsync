@@ -3,12 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1.2</Version>
+    <Version>0.0.1.3</Version>
     <Authors>xlievo</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/xlievo/SerialPortAsync</PackageProjectUrl>
     <RepositoryUrl>https://github.com/xlievo/SerialPortAsync</RepositoryUrl>
     <PackageReleaseNotes>This is the packaging from RJCP.IO.Ports.SerialPortStream and System.IO.Ports.SerialPort to async</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

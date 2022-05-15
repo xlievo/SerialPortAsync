@@ -299,37 +299,65 @@ namespace SerialPortAsync
 
         #region SerialPortClient
 
-        //public SerialPortAsyncClient(string port, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port), timeout, open) { }
+        #region SystemIOSerialPortClient
 
-        //public SerialPortAsyncClient(string port, int baud, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud), timeout, open) { }
+        //public SerialPortAsyncClient(string port, bool open = false) : this(new SystemIOSerialPortClient(port), timeoutDefault, open) { }
 
-        //public SerialPortAsyncClient(string port, int baud, int data, Parity parity, StopBits stopbits, TimeSpan timeout = default, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeout, open) { }
+        //public SerialPortAsyncClient(string port, TimeSpan timeout = default, bool open = false) : this(new SystemIOSerialPortClient(port), timeout, open) { }
 
-        ///// <summary>
-        ///// timeout default value 10 seconds.
-        ///// </summary>
-        ///// <param name="port"></param>
-        ///// <param name="open"></param>
-        //public SerialPortClient(string port, bool open = false) : this(new SerialPortStream(port), timeoutDefault, open) { }
+        //public SerialPortAsyncClient(string port, int baud, bool open = false) : this(new SystemIOSerialPortClient(port, baud), timeoutDefault, open) { }
 
-        ///// <summary>
-        ///// timeout default value 10 seconds.
-        ///// </summary>
-        ///// <param name="port"></param>
-        ///// <param name="baud"></param>
-        ///// <param name="open"></param>
-        //public SerialPortAsyncClient(string port, int baud, bool open = false) : this(new SerialPortStream(port, baud), timeoutDefault, open) { }
+        //public SerialPortAsyncClient(string port, int baud, TimeSpan timeout = default, bool open = false) : this(new SystemIOSerialPortClient(port, baud), timeout, open) { }
 
-        ///// <summary>
-        ///// timeout default value 10 seconds.
-        ///// </summary>
-        ///// <param name="port"></param>
-        ///// <param name="baud"></param>
-        ///// <param name="data"></param>
-        ///// <param name="parity"></param>
-        ///// <param name="stopbits"></param>
-        ///// <param name="open"></param>
-        //public SerialPortAsyncClient(string port, int baud, int data, Parity parity, StopBits stopbits, bool open = false) : this(new SerialPortStream(port, baud, data, parity, stopbits), timeoutDefault, open) { }
+        /// <summary>
+        /// timeout default value 10 seconds.
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="baud"></param>
+        /// <param name="parity"></param>
+        /// <param name="data"></param>
+        /// <param name="stopbits"></param>
+        /// <param name="open"></param>
+        public SerialPortAsyncClient(string port, int baud, System.IO.Ports.Parity parity, int data, System.IO.Ports.StopBits stopbits, bool open = false) : this(new SystemIOSerialPortClient(port, baud, parity, data, stopbits), timeoutDefault, open) { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="baud"></param>
+        /// <param name="parity"></param>
+        /// <param name="data"></param>
+        /// <param name="stopbits"></param>
+        /// <param name="timeout"></param>
+        /// <param name="open"></param>
+        public SerialPortAsyncClient(string port, int baud, System.IO.Ports.Parity parity, int data, System.IO.Ports.StopBits stopbits, TimeSpan timeout = default, bool open = false) : this(new SystemIOSerialPortClient(port, baud, parity, data, stopbits), timeout, open) { }
+
+        #endregion
+
+        #region SerialPortStreamClient
+
+        //public SerialPortAsyncClient(string port, bool open = false) : this(new SerialPortStreamClient(port), timeoutDefault, open) { }
+
+        //public SerialPortAsyncClient(string port, TimeSpan timeout = default, bool open = false) : this(new SerialPortStreamClient(port), timeout, open) { }
+
+        //public SerialPortAsyncClient(string port, int baud, bool open = false) : this(new SerialPortStreamClient(port, baud), timeoutDefault, open) { }
+
+        //public SerialPortAsyncClient(string port, int baud, TimeSpan timeout = default, bool open = false) : this(new SerialPortStreamClient(port, baud), timeout, open) { }
+
+        /// <summary>
+        /// timeout default value 10 seconds.
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="baud"></param>
+        /// <param name="data"></param>
+        /// <param name="parity"></param>
+        /// <param name="stopbits"></param>
+        /// <param name="open"></param>
+        public SerialPortAsyncClient(string port, int baud, int data, RJCP.IO.Ports.Parity parity, RJCP.IO.Ports.StopBits stopbits, bool open = false) : this(new SerialPortStreamClient(port, baud, data, parity, stopbits), timeoutDefault, open) { }
+
+        public SerialPortAsyncClient(string port, int baud, int data, RJCP.IO.Ports.Parity parity, RJCP.IO.Ports.StopBits stopbits, TimeSpan timeout = default, bool open = false) : this(new SerialPortStreamClient(port, baud, data, parity, stopbits), timeout, open) { }
+
+        #endregion
 
         public SerialPortAsyncClient(ISerialPort serial, TimeSpan timeout = default, bool open = false)
         {
