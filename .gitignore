@@ -7,3 +7,7 @@
 /SerialPortAsync/bin
 /SerialPortAsync/SerialPortAsync.csproj.user
 /SerialPortAsync/Properties/PublishProfiles
+/Demo/bin
+/Demo/obj
+/Demo/Properties/PublishProfiles
+*.user
