@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32413.511
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortAsync", "SerialPortAsync\SerialPortAsync.csproj", "{84001B2D-8600-44AB-9C24-DAAA3F5DED3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerialPortAsync", "SerialPortAsync\SerialPortAsync.csproj", "{84001B2D-8600-44AB-9C24-DAAA3F5DED3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{1CF6C957-7A22-4A6E-AC57-08CF102CB408}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{84001B2D-8600-44AB-9C24-DAAA3F5DED3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84001B2D-8600-44AB-9C24-DAAA3F5DED3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84001B2D-8600-44AB-9C24-DAAA3F5DED3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CF6C957-7A22-4A6E-AC57-08CF102CB408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CF6C957-7A22-4A6E-AC57-08CF102CB408}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CF6C957-7A22-4A6E-AC57-08CF102CB408}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CF6C957-7A22-4A6E-AC57-08CF102CB408}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

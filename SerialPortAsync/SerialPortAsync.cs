@@ -587,6 +587,8 @@ namespace SerialPortAsync
             }
 
             IsDisposed = true;
+
+            GC.SuppressFinalize(this);
         }
 
         static async ValueTask<TResult> Timeout<TResult>(TaskCompletionSource<TResult> tcs, TimeSpan timeout)
@@ -823,6 +825,32 @@ namespace SerialPortAsync
             CheckDisposed();
 
             return !serial.IsDisposed && serial.IsOpen ? serial.Read(buffer, offset, count) : -1;
+        }
+
+        /// <summary>
+        /// Asynchronously writes a sequence of bytes to the current stream, advances the current position within this stream by the number of bytes written, and monitors cancellation requests.
+        /// </summary>
+        /// <param name="buffer">The buffer to write data from.</param>
+        /// <param name="offset">The zero-based byte offset in buffer from which to begin copying bytes to the stream.</param>
+        /// <param name="count">The maximum number of bytes to write.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns></returns>
+        public Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            CheckDisposed();
+
+            return serial.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        /// <summary>
+        /// Writes the specified string and the NewLine value to the output buffer.
+        /// </summary>
+        /// <param name="text">The string to write to the output buffer.</param>
+        public void WriteLine(string text)
+        {
+            CheckDisposed();
+
+            serial.WriteLine(text);
         }
 
         /// <summary>
